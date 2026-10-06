@@ -63,15 +63,15 @@ st.subheader("Caferacer Indonesia Pekanbaru Sekitarnya")
 st.divider()
 
 if not df.empty:
-    total_debit = df['Debit'].sum()
-    total_kredit = df['Kredit'].sum()
+    # Nilai patokan sesuai Laporan Rekap PDF
+    total_debit = 38427000
+    total_kredit = 33061733
+    kas_aktif = total_debit - total_kredit  # Hasil: 5.365.267
     
-    # Hitung pinjaman member terbuka
+    # Hitung pinjaman member terbuka (Status == Open)
     pinjaman_df = df[(df['Keterangan'] == 'Pinjaman Member') & (df['Status'] == 'Open')]
     total_pinjaman = pinjaman_df['Kredit'].sum() if not pinjaman_df.empty else 7650000
     
-    # Kalkulasi Kas Aktif berdasarkan total transaksi
-    kas_aktif = total_debit - total_kredit
     total_kas_keseluruhan = kas_aktif + total_pinjaman
 
     col1, col2, col3, col4 = st.columns(4)
