@@ -6,7 +6,7 @@ import io
 
 # Konfigurasi Halaman
 st.set_page_config(
-    page_title="KAS CRIPS Dashboard",
+    page_title="Dashboard KAS CRIPS",
     page_icon="🏍️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -53,12 +53,12 @@ def save_data_to_github(df, sha):
 # Ambil Data Terbaru
 df, file_sha = load_data_from_github()
 
-# Sidebar / Panel Admin Bendahara (Ditaruh di atas agar sidebar selalu muncul)
+# Sidebar Panel Admin
 st.sidebar.header("🔐 Akses Admin / Bendahara")
 password = st.sidebar.text_input("Masukkan Password Admin", type="password")
 
 # Header Utama
-st.title("🏍️ Dashboard KAS CRIPS")
+st.title("🏍️ Dashboard KAS CRIPS 2023–2026")
 st.subheader("Caferacer Indonesia Pekanbaru Sekitarnya")
 st.divider()
 
@@ -85,7 +85,7 @@ if not df.empty:
 
     st.subheader("📊 Visualisasi Alokasi Dana")
     summary_data = pd.DataFrame({
-        'Kategori': ['Kas Aktif', 'Pinjaman Member', 'Total Kredit (Terpakai)'],
+        'Kategori': ['Kas Aktif', 'Pinjaman Member', 'Total Uang Keluar (Kredit)'],
         'Jumlah': [kas_aktif, total_pinjaman, total_kredit]
     })
     
@@ -98,16 +98,40 @@ if not df.empty:
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # Section Riwayat & Sortir Simpel
     st.subheader("📜 Riwayat Transaksi Kas")
+    
+    col_s1, col_s2 = st.columns([2, 1])
+    with col_s1:
+        sort_by = st.selectbox(
+            "Urutkan Berdasarkan:",
+            ["Tanggal (Terbaru)", "Tanggal (Terlama)", "Status (Open)", "Status (Close)", "Debit (Terbesar)", "Kredit (Terbesar)"]
+        )
+    
+    # Logika Sortir Simpel
+    df_display = df.copy()
+    if sort_by == "Tanggal (Terbaru)":
+        df_display = df_display.sort_values(by="Tanggal", ascending=False)
+    elif sort_by == "Tanggal (Terlama)":
+        df_display = df_display.sort_values(by="Tanggal", ascending=True)
+    elif sort_by == "Status (Open)":
+        df_display = df_display.sort_values(by="Status", ascending=False)
+    elif sort_by == "Status (Close)":
+        df_display = df_display.sort_values(by="Status", ascending=True)
+    elif sort_by == "Debit (Terbesar)":
+        df_display = df_display.sort_values(by="Debit", ascending=False)
+    elif sort_by == "Kredit (Terbesar)":
+        df_display = df_display.sort_values(by="Kredit", ascending=False)
+
     st.dataframe(
-        df.style.format({'Debit': 'Rp {:,.0f}', 'Kredit': 'Rp {:,.0f}'}),
+        df_display.style.format({'Debit': 'Rp {:,.0f}', 'Kredit': 'Rp {:,.0f}'}),
         use_container_width=True
     )
 
 st.divider()
 
 # Logika Akses Admin
-if password == st.secrets.get("ADMIN_PASSWORD", "admin123"):
+if password == st.secrets.get("ADMIN_PASSWORD", "cripspekanbaru"):
     st.sidebar.success("Akses Diterima!")
     st.header("⚙️ Panel Kelola Transaksi (Bendahara)")
     
