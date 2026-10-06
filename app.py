@@ -4,10 +4,10 @@ import plotly.express as px
 from github import Github
 import io
 
-# Konfigurasi Halaman
+# Konfigurasi Halaman & Favicon Tab Browser
 st.set_page_config(
     page_title="Dashboard KAS CRIPS",
-    page_icon="🏍️",
+    page_icon="assets/logo_crips.png",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -23,7 +23,6 @@ def load_data_from_github():
         csv_data = file_content.decoded_content.decode("utf-8")
         df = pd.read_csv(io.StringIO(csv_data))
         
-        # Perbaikan konversi tanggal agar fleksibel
         df['Tanggal'] = pd.to_datetime(df['Tanggal'], format='mixed', errors='coerce')
         return df, file_content.sha
     except Exception as e:
@@ -63,9 +62,19 @@ df, file_sha = load_data_from_github()
 st.sidebar.header("🔐 Akses Admin / Bendahara")
 password = st.sidebar.text_input("Masukkan Password Admin", type="password")
 
-# Header Utama
-st.title("🏍️ Dashboard KAS CRIPS 2023–2026")
-st.subheader("Caferacer Indonesia Pekanbaru Sekitarnya")
+# Header Utama dengan Logo CRIPS
+col_logo, col_title = st.columns([1, 6])
+
+with col_logo:
+    try:
+        st.image("assets/logo_crips.png", width=90)
+    except:
+        st.write("🏍️")
+
+with col_title:
+    st.title("Dashboard KAS CRIPS 2023–2026")
+    st.caption("Caferacer Indonesia Pekanbaru Sekitarnya")
+
 st.divider()
 
 if not df.empty:
@@ -145,7 +154,7 @@ st.divider()
 # Logika Akses Admin
 if password == st.secrets.get("ADMIN_PASSWORD", "cripspekanbaru"):
     st.sidebar.success("Akses Diterima!")
-    st.header("⚙️ Panel Kelola Transaksi (Bendahara)")
+    st.header("⚙️️ Panel Kelola Transaksi (Bendahara)")
     
     tab_tambah, tab_edit = st.tabs(["➕ Tambah Transaksi Baru", "✏️ Edit / Hapus Data"])
     
