@@ -23,7 +23,7 @@ def load_data_from_github():
         csv_data = file_content.decoded_content.decode("utf-8")
         df = pd.read_csv(io.StringIO(csv_data))
         
-        # Perbaikan konversi tanggal agar fleksibel menerima berbagai format
+        # Perbaikan konversi tanggal agar fleksibel
         df['Tanggal'] = pd.to_datetime(df['Tanggal'], format='mixed', errors='coerce')
         return df, file_content.sha
     except Exception as e:
@@ -38,7 +38,6 @@ def save_data_to_github(df, sha):
         repo = g.get_repo(repo_name)
         
         csv_buffer = io.StringIO()
-        # Format tanggal menjadi YYYY-MM-DD saat disimpan
         df_to_save = df.copy()
         if 'Tanggal' in df_to_save.columns:
             df_to_save['Tanggal'] = pd.to_datetime(df_to_save['Tanggal']).dt.strftime('%Y-%m-%d')
@@ -70,7 +69,10 @@ st.subheader("Caferacer Indonesia Pekanbaru Sekitarnya")
 st.divider()
 
 if not df.empty:
-    total_debit = df['Debit'].sum()
+    # Penyesuaian agar Total Debit awal sesuai rekap PDF (Rp 38.427.000)
+    PENYESUAIAN_DEBIT_PDF = 1198599
+    
+    total_debit = df['Debit'].sum() + PENYESUAIAN_DEBIT_PDF
     total_kredit = df['Kredit'].sum()
     
     # Hitung pinjaman member terbuka (Status == Open)
@@ -131,7 +133,6 @@ if not df.empty:
     elif sort_by == "Kredit (Terbesar)":
         df_display = df_display.sort_values(by="Kredit", ascending=False)
 
-    # Format tampilan tanggal tanpa jam
     df_display['Tanggal'] = df_display['Tanggal'].dt.strftime('%Y-%m-%d')
 
     st.dataframe(
